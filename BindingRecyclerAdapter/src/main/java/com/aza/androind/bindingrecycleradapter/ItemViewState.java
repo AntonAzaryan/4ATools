@@ -7,10 +7,10 @@ import android.databinding.BaseObservable;
  * Created by anton on 23.01.17.
  */
 
-public abstract class ItemViewModel<D> extends BaseObservable {
+public abstract class ItemViewState<D> extends BaseObservable {
 
     D dataModel;
-    BindingViewHolder<D> viewHolder;
+    BindingViewHolder<D> viewHolder; //TODO weak reference or leak
 
     public void onBindDataModel(int position, D model) {
         dataModel = model;

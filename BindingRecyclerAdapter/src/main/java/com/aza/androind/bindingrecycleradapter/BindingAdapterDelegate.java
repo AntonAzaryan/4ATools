@@ -14,5 +14,6 @@ public interface BindingAdapterDelegate<D> {
 
     int getBindingVariable(@LayoutRes int layoutResId);
 
-    ItemViewModel<D> createItemViewModel(int itemViewType);
+    ItemViewState<D> createItemViewState(int itemViewType);
+
 }

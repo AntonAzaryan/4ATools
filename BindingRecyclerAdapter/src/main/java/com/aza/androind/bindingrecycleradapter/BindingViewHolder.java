@@ -10,7 +10,7 @@ import android.support.v7.widget.RecyclerView;
 public class BindingViewHolder<D> extends RecyclerView.ViewHolder {
 
     final ViewDataBinding binding;
-    ItemViewModel<D> viewModel;
+    ItemViewState<D> viewModel;
 
     public BindingViewHolder(ViewDataBinding binding) {
         super(binding.getRoot());
@@ -28,7 +28,7 @@ public class BindingViewHolder<D> extends RecyclerView.ViewHolder {
         return (B) binding;
     }
 
-    public ItemViewModel<D> getViewModel() {
+    public ItemViewState<D> getViewModel() {
         return viewModel;
     }
 

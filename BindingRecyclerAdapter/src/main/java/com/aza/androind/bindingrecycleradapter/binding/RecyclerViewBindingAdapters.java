@@ -9,18 +9,17 @@ import android.databinding.BindingConversion;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.aza.androind.bindingrecycleradapter.AdapterDataModel;
 import com.aza.androind.bindingrecycleradapter.BindingAdapterDelegate;
 import com.aza.androind.bindingrecycleradapter.BindingRecyclerViewAdapter;
 import com.aza.androind.bindingrecycleradapter.StaticIdsHolder;
 
-import java.util.List;
-
 public class RecyclerViewBindingAdapters {
 
     @SuppressWarnings("unchecked")
-    @BindingAdapter(value = {"dataList", "delegate", "adapter", "viewHolder", "staticIds"}, requireAll = false)
+    @BindingAdapter(value = {"dataModel", "delegate", "adapter", "viewHolder", "staticIds"}, requireAll = false)
     public static <T> void setAdapter(RecyclerView recyclerView,
-                                      List<T> dataList,
+                                      AdapterDataModel<T> dataModel,
                                       BindingAdapterDelegate<T> delegate,
                                       BindingRecyclerViewAdapter.Factory adapterFactory,
                                       BindingRecyclerViewAdapter.ViewHolderFactory viewHolderFactory,
@@ -34,12 +33,12 @@ public class RecyclerViewBindingAdapters {
         BindingRecyclerViewAdapter<T> adapter = (BindingRecyclerViewAdapter<T>) recyclerView.getAdapter();
         if (adapter == null) {
             adapter = adapterFactory.create(recyclerView, delegate);
-            adapter.setDataList(dataList);
+            adapter.setDataModel(dataModel);
             adapter.setViewHolderFactory(viewHolderFactory);
             adapter.setStaticIdsHolder(staticItemsIds);
             recyclerView.setAdapter(adapter);
         } else {
-            adapter.setDataList(dataList);
+            adapter.setDataModel(dataModel);
         }
     }
 

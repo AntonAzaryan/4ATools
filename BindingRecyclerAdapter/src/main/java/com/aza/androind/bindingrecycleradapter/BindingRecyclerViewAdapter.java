@@ -1,16 +1,13 @@
 package com.aza.androind.bindingrecycleradapter;
 
 import android.databinding.DataBindingUtil;
-import android.databinding.ObservableList;
 import android.databinding.ViewDataBinding;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-
-import java.util.Collections;
-import java.util.List;
 
 import static android.support.v7.widget.RecyclerView.NO_ID;
 import static com.aza.androind.bindingrecycleradapter.BindingAdapterDelegate.BINDING_VARIABLE_NONE;
@@ -21,45 +18,31 @@ import static com.aza.androind.bindingrecycleradapter.BindingAdapterDelegate.BIN
 
 public class BindingRecyclerViewAdapter<D> extends RecyclerView.Adapter<BindingViewHolder<D>> {
 
-    List<D> dataList;
+    AdapterDataModel<D> dataModel;
 
-    LayoutInflater inflater;
+    protected LayoutInflater inflater;
 
-    ViewHolderFactory viewHolderFactory;
-    StaticIdsHolder<D> staticIdsHolder;
-    WeakReferenceOnListChangedCallback<D> observableListCallback;
+    protected ViewHolderFactory viewHolderFactory;
+    protected StaticIdsHolder<D> staticIdsHolder;
 
     final BindingAdapterDelegate<D> bindingDelegate;
-
-    @Nullable
-    RecyclerView recyclerView;
+    boolean attachedToRecyclerView;
 
     public BindingRecyclerViewAdapter(BindingAdapterDelegate<D> adapterDelegate) {
-        dataList = Collections.emptyList();
+        dataModel = AdapterDataModel.empty();
         bindingDelegate = adapterDelegate;
-    }
-
-    WeakReferenceOnListChangedCallback<D> getOnListChangeCallback() {
-        if (observableListCallback == null) {
-            observableListCallback = new WeakReferenceOnListChangedCallback<>(this);
-        }
-        return observableListCallback;
     }
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-        if (this.recyclerView == null && dataList instanceof ObservableList) {
-            ((ObservableList<D>) dataList).addOnListChangedCallback(getOnListChangeCallback());
-        }
-        this.recyclerView = recyclerView;
+        attachedToRecyclerView = true;
+        dataModel.onAttachedToAdapter(this);
     }
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-        if (this.recyclerView != null && dataList instanceof ObservableList) {
-            ((ObservableList<D>) dataList).removeOnListChangedCallback(getOnListChangeCallback());
-        }
-        this.recyclerView = null;
+        attachedToRecyclerView = false;
+        dataModel.onDetachedFromAdapter();
     }
 
     @Override
@@ -77,7 +60,7 @@ public class BindingRecyclerViewAdapter<D> extends RecyclerView.Adapter<BindingV
         int bindingVariable = bindingDelegate.getBindingVariable(layoutResId);
         //check if we need to bind viewModel to layout
         if (bindingVariable != BINDING_VARIABLE_NONE) {
-            ItemViewModel<D> viewModel = bindingDelegate.createItemViewModel(layoutResId);
+            ItemViewState<D> viewModel = bindingDelegate.createItemViewState(layoutResId);
             //link viewHolder and viewModel
             viewHolder.viewModel = viewModel;
             viewModel.viewHolder = viewHolder;
@@ -93,12 +76,12 @@ public class BindingRecyclerViewAdapter<D> extends RecyclerView.Adapter<BindingV
 
     @Override
     public void onBindViewHolder(BindingViewHolder<D> holder, int position) {
-        holder.onBindDataModel(position, dataList.get(position));
+        holder.onBindDataModel(position, dataModel.getItemByPosition(position));
     }
 
     @Override
     public int getItemViewType(int position) {
-        return bindingDelegate.getItemViewType(position, dataList.get(position));
+        return bindingDelegate.getItemViewType(position, dataModel.getItemByPosition(position));
     }
 
     @Override
@@ -118,33 +101,30 @@ public class BindingRecyclerViewAdapter<D> extends RecyclerView.Adapter<BindingV
 
     @Override
     public int getItemCount() {
-        return dataList.size();
+        return dataModel.getItemCount();
     }
 
     @Override
     public long getItemId(int position) {
         return hasStableIds() && staticIdsHolder != null ?
-                staticIdsHolder.getItemId(position, dataList.get(position)) :
+                staticIdsHolder.getItemId(position, dataModel.getItemByPosition(position)) :
                 NO_ID;
     }
 
-    public List<D> getDataList() {
-        return dataList;
+    public AdapterDataModel<D> getDataModel() {
+        return dataModel;
     }
 
-    public void setDataList(@Nullable List<D> dataList) {
-        if (dataList == null || dataList == this.dataList)
+    public void setDataModel(@NonNull AdapterDataModel<D> dataModel) {
+        if (dataModel == this.dataModel)
             return;
 
-        if (recyclerView != null) {
-            if (this.dataList instanceof ObservableList) {
-                ((ObservableList<D>) this.dataList).removeOnListChangedCallback(getOnListChangeCallback());
-            }
-            if (dataList instanceof ObservableList) {
-                ((ObservableList<D>) dataList).addOnListChangedCallback(getOnListChangeCallback());
-            }
+        if (attachedToRecyclerView) {
+            this.dataModel.onDetachedFromAdapter();
+            dataModel.onAttachedToAdapter(this);
         }
-        this.dataList = dataList;
+
+        this.dataModel = dataModel;
         notifyDataSetChanged();
     }
 
