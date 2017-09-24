@@ -9,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import static android.support.v7.widget.RecyclerView.NO_ID;
 import static com.aza.androind.bindingrecycleradapter.BindingAdapterDelegate.BINDING_VARIABLE_NONE;
 
 /**
@@ -18,31 +17,31 @@ import static com.aza.androind.bindingrecycleradapter.BindingAdapterDelegate.BIN
 
 public class BindingRecyclerViewAdapter<D> extends RecyclerView.Adapter<BindingViewHolder<D>> {
 
-    AdapterDataModel<D> dataModel;
+    AdapterDataModel<D> adapterDataModel;
 
     protected LayoutInflater inflater;
 
     protected ViewHolderFactory viewHolderFactory;
-    protected StaticIdsHolder<D> staticIdsHolder;
 
     final BindingAdapterDelegate<D> bindingDelegate;
     boolean attachedToRecyclerView;
 
     public BindingRecyclerViewAdapter(BindingAdapterDelegate<D> adapterDelegate) {
-        dataModel = AdapterDataModel.empty();
+        adapterDataModel = AdapterDataModel.empty();
         bindingDelegate = adapterDelegate;
     }
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         attachedToRecyclerView = true;
-        dataModel.onAttachedToAdapter(this);
+        adapterDataModel.onAttachedToAdapter(this);
+        setHasStableIds(adapterDataModel.hasStableIds());
     }
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
         attachedToRecyclerView = false;
-        dataModel.onDetachedFromAdapter();
+        adapterDataModel.onDetachedFromAdapter();
     }
 
     @Override
@@ -76,12 +75,12 @@ public class BindingRecyclerViewAdapter<D> extends RecyclerView.Adapter<BindingV
 
     @Override
     public void onBindViewHolder(BindingViewHolder<D> holder, int position) {
-        holder.onBindDataModel(position, dataModel.getItemByPosition(position));
+        holder.onBindDataModel(position, adapterDataModel.getItemByPosition(position));
     }
 
     @Override
     public int getItemViewType(int position) {
-        return bindingDelegate.getItemViewType(position, dataModel.getItemByPosition(position));
+        return bindingDelegate.getItemViewType(position, adapterDataModel.getItemByPosition(position));
     }
 
     @Override
@@ -101,40 +100,30 @@ public class BindingRecyclerViewAdapter<D> extends RecyclerView.Adapter<BindingV
 
     @Override
     public int getItemCount() {
-        return dataModel.getItemCount();
+        return adapterDataModel.getItemCount();
     }
 
     @Override
     public long getItemId(int position) {
-        return hasStableIds() && staticIdsHolder != null ?
-                staticIdsHolder.getItemId(position, dataModel.getItemByPosition(position)) :
-                NO_ID;
+        return adapterDataModel.getStaticItemId(position, adapterDataModel.getItemByPosition(position));
     }
 
-    public AdapterDataModel<D> getDataModel() {
-        return dataModel;
+    public AdapterDataModel<D> getAdapterDataModel() {
+        return adapterDataModel;
     }
 
-    public void setDataModel(@NonNull AdapterDataModel<D> dataModel) {
-        if (dataModel == this.dataModel)
+    public void setAdapterDataModel(@NonNull AdapterDataModel<D> adapterDataModel) {
+        if (adapterDataModel == this.adapterDataModel)
             return;
 
         if (attachedToRecyclerView) {
-            this.dataModel.onDetachedFromAdapter();
-            dataModel.onAttachedToAdapter(this);
+            this.adapterDataModel.onDetachedFromAdapter();
+            adapterDataModel.onAttachedToAdapter(this);
+            setHasStableIds(adapterDataModel.hasStableIds());
         }
 
-        this.dataModel = dataModel;
+        this.adapterDataModel = adapterDataModel;
         notifyDataSetChanged();
-    }
-
-    /**
-     * Set the item id's for the items. If not null, this will set {@link
-     * android.support.v7.widget.RecyclerView.Adapter#setHasStableIds(boolean)} to true.
-     */
-    public void setStaticIdsHolder(@Nullable StaticIdsHolder<D> staticIdsHolder) {
-        this.staticIdsHolder = staticIdsHolder;
-        setHasStableIds(staticIdsHolder != null);
     }
 
     public void setViewHolderFactory(@Nullable ViewHolderFactory viewHolderFactory) {

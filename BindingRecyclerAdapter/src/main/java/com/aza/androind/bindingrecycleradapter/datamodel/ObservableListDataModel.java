@@ -4,7 +4,9 @@ import android.databinding.ObservableArrayList;
 import android.databinding.ObservableList;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.NonNull;
+
+import java.util.List;
 
 /**
  * Created by anton_azaryan on 18.09.17.
@@ -22,6 +24,11 @@ public class ObservableListDataModel<D> extends AdapterListDataModel<D> {
         return (ObservableArrayList<D>) dataList;
     }
 
+    @Override
+    public void setDataList(@NonNull List<D> dataList) {
+        throw new IllegalStateException("Unsupported operation!");
+    }
+
     class OnListChangedCallbackImpl extends ObservableList.OnListChangedCallback<ObservableList<?>> {
 
         final Handler handler = new Handler(Looper.getMainLooper());
@@ -32,11 +39,7 @@ public class ObservableListDataModel<D> extends AdapterListDataModel<D> {
                 handler.post(() -> onChanged(sender));
                 return;
             }
-
-            RecyclerView.Adapter adapter = getAdapter();
-            if (adapter == null) return;
-
-            adapter.notifyDataSetChanged();
+            notifyDataSetChanged();
         }
 
         @Override
@@ -45,11 +48,7 @@ public class ObservableListDataModel<D> extends AdapterListDataModel<D> {
                 handler.post(() -> onItemRangeChanged(sender, positionStart, itemCount));
                 return;
             }
-
-            RecyclerView.Adapter adapter = getAdapter();
-            if (adapter == null) return;
-
-            adapter.notifyItemRangeChanged(positionStart, itemCount);
+            notifyItemRangeChanged(positionStart, itemCount);
         }
 
         @Override
@@ -58,11 +57,7 @@ public class ObservableListDataModel<D> extends AdapterListDataModel<D> {
                 handler.post(() -> onItemRangeInserted(sender, positionStart, itemCount));
                 return;
             }
-
-            RecyclerView.Adapter adapter = getAdapter();
-            if (adapter == null) return;
-
-            adapter.notifyItemRangeInserted(positionStart, itemCount);
+            notifyItemRangeInserted(positionStart, itemCount);
         }
 
         @Override
@@ -71,13 +66,7 @@ public class ObservableListDataModel<D> extends AdapterListDataModel<D> {
                 handler.post(() -> onItemRangeMoved(sender, fromPosition, toPosition, itemCount));
                 return;
             }
-
-            RecyclerView.Adapter adapter = getAdapter();
-            if (adapter == null) return;
-
-            for (int i = 0; i < itemCount; i++) {
-                adapter.notifyItemMoved(fromPosition + i, toPosition + i);
-            }
+            notifyItemRangeMoved(fromPosition, toPosition, itemCount);
         }
 
         @Override
@@ -86,11 +75,7 @@ public class ObservableListDataModel<D> extends AdapterListDataModel<D> {
                 handler.post(() -> onItemRangeRemoved(sender, positionStart, itemCount));
                 return;
             }
-
-            RecyclerView.Adapter adapter = getAdapter();
-            if (adapter == null) return;
-
-            adapter.notifyItemRangeRemoved(positionStart, itemCount);
+            notifyItemRangeRemoved(positionStart, itemCount);
         }
     }
 

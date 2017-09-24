@@ -12,18 +12,16 @@ import android.support.v7.widget.RecyclerView;
 import com.aza.androind.bindingrecycleradapter.AdapterDataModel;
 import com.aza.androind.bindingrecycleradapter.BindingAdapterDelegate;
 import com.aza.androind.bindingrecycleradapter.BindingRecyclerViewAdapter;
-import com.aza.androind.bindingrecycleradapter.StaticIdsHolder;
 
 public class RecyclerViewBindingAdapters {
 
     @SuppressWarnings("unchecked")
-    @BindingAdapter(value = {"dataModel", "delegate", "adapter", "viewHolder", "staticIds"}, requireAll = false)
+    @BindingAdapter(value = {"dataModel", "delegate", "adapter", "viewHolder"}, requireAll = false)
     public static <T> void setAdapter(RecyclerView recyclerView,
                                       AdapterDataModel<T> dataModel,
                                       BindingAdapterDelegate<T> delegate,
                                       BindingRecyclerViewAdapter.Factory adapterFactory,
-                                      BindingRecyclerViewAdapter.ViewHolderFactory viewHolderFactory,
-                                      StaticIdsHolder<T> staticItemsIds) {
+                                      BindingRecyclerViewAdapter.ViewHolderFactory viewHolderFactory) {
         if (delegate == null) {
             throw new IllegalArgumentException("BindingAdapterDelegate must not be null");
         }
@@ -33,12 +31,11 @@ public class RecyclerViewBindingAdapters {
         BindingRecyclerViewAdapter<T> adapter = (BindingRecyclerViewAdapter<T>) recyclerView.getAdapter();
         if (adapter == null) {
             adapter = adapterFactory.create(recyclerView, delegate);
-            adapter.setDataModel(dataModel);
+            adapter.setAdapterDataModel(dataModel);
             adapter.setViewHolderFactory(viewHolderFactory);
-            adapter.setStaticIdsHolder(staticItemsIds);
             recyclerView.setAdapter(adapter);
         } else {
-            adapter.setDataModel(dataModel);
+            adapter.setAdapterDataModel(dataModel);
         }
     }
 

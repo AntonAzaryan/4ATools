@@ -2,44 +2,35 @@ package com.aza.androind.bindingrecycleradapter;
 
 import android.support.v7.widget.RecyclerView;
 
+import com.aza.androind.bindingrecycleradapter.datamodel.SimpleAdapterDataModel;
+
 /**
  * Created by anton_azaryan on 17.09.17.
  */
 
 public interface AdapterDataModel<D> {
 
-    int getItemCount();
-
-    D getItemByPosition(int position);
-
-    void onAttachedToAdapter(RecyclerView.Adapter adapter);
-
-    void onDetachedFromAdapter();
+    AdapterDataModel EMPTY = new SimpleAdapterDataModel();
 
     @SuppressWarnings("unchecked")
     static <D> AdapterDataModel<D> empty() {
         return (AdapterDataModel<D>) EMPTY;
     }
 
-    AdapterDataModel EMPTY = new AdapterDataModel() {
+    int getItemCount();
 
-        @Override
-        public int getItemCount() {
-            return 0;
-        }
+    D getItemByPosition(int position);
 
-        @Override
-        public Object getItemByPosition(int position) {
-            return null;
-        }
+    /**
+     * @return Id for item. If >= 0, this will set {@link
+     * android.support.v7.widget.RecyclerView.Adapter#setHasStableIds(boolean)} to true.
+     */
+    long getStaticItemId(int position, D item);
 
-        @Override
-        public void onAttachedToAdapter(RecyclerView.Adapter adapter) {
+    boolean hasStableIds();
 
-        }
+    void onAttachedToAdapter(RecyclerView.Adapter adapter);
 
-        @Override
-        public void onDetachedFromAdapter() {
-        }
-    };
+    void onDetachedFromAdapter();
+
 }

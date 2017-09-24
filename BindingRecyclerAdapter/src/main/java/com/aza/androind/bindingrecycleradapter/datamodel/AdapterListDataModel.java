@@ -2,6 +2,7 @@ package com.aza.androind.bindingrecycleradapter.datamodel;
 
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,7 +11,11 @@ import java.util.List;
 
 public class AdapterListDataModel<D> extends BaseAdapterDataModel<D> {
 
-    final List<D> dataList;
+    List<D> dataList;
+
+    public AdapterListDataModel() {
+        this(new ArrayList<>());
+    }
 
     public AdapterListDataModel(@NonNull List<D> dataList) {
         this.dataList = dataList;
@@ -18,6 +23,11 @@ public class AdapterListDataModel<D> extends BaseAdapterDataModel<D> {
 
     public List<D> getList() {
         return dataList;
+    }
+
+    public void setDataList(@NonNull List<D> dataList) {
+        this.dataList = dataList;
+        notifyDataSetChanged();
     }
 
     @Override
