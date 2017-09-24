@@ -3,6 +3,8 @@ package com.aza.androind.bindingrecycleradapter;
 import android.content.Context;
 import android.databinding.BaseObservable;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by anton on 23.01.17.
  */
@@ -10,10 +12,14 @@ import android.databinding.BaseObservable;
 public abstract class ItemViewState<D> extends BaseObservable {
 
     D dataModel;
-    BindingViewHolder<D> viewHolder; //TODO weak reference or leak
+    WeakReference<BindingViewHolder<D>> viewHolderRef;
 
     public void onBindDataModel(int position, D model) {
         dataModel = model;
+    }
+
+    void setViewHolder(BindingViewHolder<D> viewHolder) {
+        viewHolderRef = new WeakReference<>(viewHolder);
     }
 
     public D getDataModel() {
@@ -21,11 +27,13 @@ public abstract class ItemViewState<D> extends BaseObservable {
     }
 
     public int getAdapterPosition() {
-        return viewHolder.getAdapterPosition();
+        final BindingViewHolder<D> viewHolder = viewHolderRef.get();
+        return viewHolder != null ? viewHolder.getAdapterPosition() : -1;
     }
 
     public final Context getContext() {
-        return viewHolder.binding.getRoot().getContext();
+        final BindingViewHolder<D> viewHolder = viewHolderRef.get();
+        return viewHolder != null ? viewHolder.binding.getRoot().getContext() : null;
     }
 
     public void onViewRecycled() {

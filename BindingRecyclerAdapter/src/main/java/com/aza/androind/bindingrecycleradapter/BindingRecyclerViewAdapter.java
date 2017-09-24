@@ -63,7 +63,7 @@ public class BindingRecyclerViewAdapter<D> extends RecyclerView.Adapter<BindingV
             ItemViewState<D> viewModel = bindingDelegate.createItemViewState(layoutResId);
             //link viewHolder and viewModel
             viewHolder.viewModel = viewModel;
-            viewModel.viewHolder = viewHolder;
+            viewModel.setViewHolder(viewHolder);
             //bind viewModel to layout
             boolean bindingVariableExists = binding.setVariable(bindingVariable, viewModel);
             if (!bindingVariableExists) {
